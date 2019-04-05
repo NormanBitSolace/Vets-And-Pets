@@ -1,8 +1,6 @@
 import Foundation
 
-typealias PetModel = Pet
-
-struct Pet: Codable {
+struct PetModel: Codable {
     var id: Int?
     let practitionerId: Int
     var ownerId: Int?
@@ -16,7 +14,7 @@ struct Pet: Codable {
 }
 
 
-extension Pet {
+extension PetModel {
 
     init(id: Int?, practitionerId: Int, firstName: String, lastName: String, breed: String, dob: String, isFemale: Bool, isSpayedOrNeutered: Bool) {
         self.id = id

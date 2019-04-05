@@ -1,5 +1,16 @@
 import UIKit
 
+typealias PetInfoCompletion = () -> Void
+
+protocol PetInfoViewControllerDelegate: class {
+    func addPet(model: PetModel, vetId: Int, completion: @escaping PetInfoCompletion)
+    func updatePet(model: PetModel, vetId: Int, completion: @escaping PetInfoCompletion)
+    func petValidationFailed(message: String)
+    func petInfoDismiss(vetId: Int)
+    func petInfoPop(vetId: Int)
+    func showBreedChooser(_ currentBreed: String?)
+}
+
 final class PetInfoViewController: UIViewController {
 
     @IBOutlet weak var actionButton: UIButton!
@@ -10,28 +21,19 @@ final class PetInfoViewController: UIViewController {
     @IBOutlet weak var isFemale: UISwitch!
     @IBOutlet weak var isSpayedOrNeutered: UISwitch!
 
-    let breedPicker = UIPickerView()
-    let datePicker = UIDatePicker()
-    let toolbar = UIToolbar()
+    @IBOutlet weak var datePicker: UIDatePicker!
 
     var model: PetModel? { return createViewModel() }
     var id: Int?
-    var vetId: Int?
+    var vetId: Int!
+    weak var delegate: PetInfoViewControllerDelegate!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        breedPicker.delegate = self
-        datePicker.datePickerMode = .date
         datePicker.maximumDate = Date()
-
-        let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(hidePicker));
-        let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: nil, action: nil)
-
-        toolbar.setItems([spaceButton,doneButton], animated: false)
     }
 
     private func createViewModel() -> PetModel? {
-//        guard isValid else { return nil }
         guard let first = firstName.text,
             let last = lastName.text,
             let pid = vetId,
@@ -57,10 +59,9 @@ final class PetInfoViewController: UIViewController {
             return .failure("Unknown error.")
         }
     }
-//    var isValid: Bool { return validate() == nil }
 
     func validate() -> [String]? {
-        return Pet.validate(
+        return PetModel.validate(
             first: firstName?.text,
             last: lastName?.text,
             breed: breedTextField?.text,
@@ -79,7 +80,7 @@ final class PetInfoViewController: UIViewController {
         vetId = model.practitionerId
     }
 
-    private var missingFieldsMessage: String? {
+     private var missingFieldsMessage: String? {
         if let missing = validate() {
             return "The field(s): " + missing.joined(separator: ", ") + " are required."
         }
@@ -93,36 +94,38 @@ final class PetInfoViewController: UIViewController {
         if let model = model {
             applyModel(model)
         }
+
+        let isNewPet = model == nil
+        actionButton.addAction {
+            switch self.validateModel {
+            case let .sucssess(model):
+                if isNewPet {
+                    self.delegate.addPet(model: model, vetId: self.vetId) { self.delegate.petInfoDismiss(vetId: self.vetId) }
+                } else {
+                    self.delegate.updatePet(model: model, vetId: self.vetId) { self.delegate.petInfoPop(vetId: self.vetId) }
+                }
+            case let .failure(message):
+                self.delegate.petValidationFailed(message: message)
+            }
+        }
     }
 
-    private func showDatePicker(){
-        dateTextField.inputAccessoryView = toolbar
-        dateTextField.inputView = datePicker
-        toolbar.sizeToFit()
-    }
-
-    private func showBreedPicker() {
-        breedTextField.inputAccessoryView = toolbar
-        breedTextField.inputView = breedPicker
-        toolbar.sizeToFit()
-    }
-    @IBAction func dateEditingEnd(_ sender: Any) {
+    @IBAction func dateChanged(_ sender: Any) {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd/yyyy"
         dateTextField.text = formatter.string(from: datePicker.date)
     }
+
     @IBAction func dateEditingBegin(_ sender: Any) {
-        showDatePicker()
+        dateTextField.inputView = datePicker
     }
-    @IBAction func breedEditingEnd(_ sender: Any) {
-        breedTextField.text = Breeds.dogList[breedPicker.selectedRow(inComponent: 0)]
+
+    @IBAction func dateEditingEnd(_ sender: Any) {
         self.view.endEditing(true)
     }
+
     @IBAction func breedEditingBegin(_ sender: Any) {
-        showBreedPicker()
-    }
-   @objc func hidePicker(){
-        self.view.endEditing(true)
+        delegate.showBreedChooser(breedTextField.text)
     }
 }
 

@@ -4,6 +4,16 @@ enum ModelValidationResult<T, String> {
     case sucssess(T)
     case failure(String)
 }
+
+typealias VetInfoCompletion = () -> Void
+
+protocol VetInfoViewControllerDelegate: class {
+    func addVet(model: VetModel, completion: @escaping VetInfoCompletion)
+    func updateVet(model: VetModel, completion: @escaping VetInfoCompletion)
+    func vetValidationFailed(message: String)
+    func vetInfoDismiss()
+}
+
 final class VetInfoViewController: UIViewController {
 
     @IBOutlet weak var actionButton: UIButton!
@@ -15,10 +25,8 @@ final class VetInfoViewController: UIViewController {
 
     var model: VetModel? { return createViewModel() }
     var id: Int?
+    weak var delegate: VetInfoViewControllerDelegate!
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
     private func createViewModel() -> VetModel? {
 //        guard isValid else { return nil }
         return VetModel(id: id,
@@ -68,11 +76,27 @@ final class VetInfoViewController: UIViewController {
 
     func setup(action: String, model: VetModel? = nil) {
         title = "\(action) Vet"
+        id = model?.id
         navigationController?.setLargeNavigation()
         rightButton(systemItem: .cancel, target: self, action: #selector(self.dismissViewController))
         actionButton.setTitle("\(action)", for: .normal)
         if let model = model {
             applyModel(model)
+        }
+
+        let isNewVet = id == nil
+        actionButton.addAction {
+            let completion: () -> Void = { self.delegate.vetInfoDismiss() }
+            switch self.validateModel {
+            case let .sucssess(model):
+                if isNewVet {
+                    self.delegate.addVet(model: model, completion: completion)
+                } else {
+                    self.delegate.updateVet(model: model, completion: completion)
+                }
+            case let .failure(message):
+                self.delegate.vetValidationFailed(message: message)
+            }
         }
     }
 }

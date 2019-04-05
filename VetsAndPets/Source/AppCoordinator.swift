@@ -1,7 +1,6 @@
 import UIKit
 import MapKit
 
-// TODO why isn't pet loading dismissed if asyncAfter is 0?
 final class AppCoordinator: NSObject {
 
     let loadingPresenter: LoadingPresenter
@@ -27,8 +26,24 @@ final class AppCoordinator: NSObject {
     func showRootViewController() {
         navigator.showVetList { vc in
             vc.delegate = self
-            // TODO this is where we can call get List
+            self.fetchVets(vc)
        }
+    }
+
+    func fetchVets(_ vc: VetsViewController) {
+        self.loadingPresenter.show(message: "Getting Vets")
+        self.dataService.vets { models in
+            vc.dataCompletion(models)
+            self.loadingPresenter.hide()
+        }
+    }
+
+    func fetchPets(_ vc: PetsViewController, _ vetId: Int) {
+        self.loadingPresenter.show(message: "Getting Pets")
+        self.dataService.pets(forVet: vetId) { models in
+            vc.dataCompletion(models)
+            self.loadingPresenter.hide()
+        }
     }
 
     @objc func reachabilityChanged(note: Notification) {
@@ -58,10 +73,12 @@ final class AppCoordinator: NSObject {
         }
     }
 
-    func runTask(task: Task) {
-        self.loadingPresenter.show(message: task.message)
-        task.run {
-            self.loadingPresenter.hide()
+    func run(_ task: DataServiceTask, message: String, completion: (() -> Void)? = nil) {
+        self.loadingPresenter.show(message: message)
+        task.run(dataService) {
+            self.loadingPresenter.hide() {
+                completion?()
+            }
         }
     }
 }
@@ -80,106 +97,161 @@ extension AppCoordinator: PetOwnerInfoViewControllerDelegate {
 
 }
 
-extension AppCoordinator: PetsViewControllerDelegate {
+extension AppCoordinator: PetUserActionDelegate {
 
-    func runPetActionTask(_ request: ActionRequest<PetModel>, _ vetId: Int, _ model: PetModel? = nil) {
-        let task = TaskBuilder.build(dataService, request, model, vetId: vetId)
-        runTask(task: task)
-    }
-
-    func actionRequest(_ request: ActionRequest<PetModel>, vetId: Int) {
-        switch request.action {
-        case .list:
-            runPetActionTask(request, vetId)
-        case .add:
+    func handle(_ action: UserAction<PetModel, PetsCompletion>, vetId: Int) {
+        switch action {
+        case .add(_):
             navigator.showPetInfo { vc in
                 vc.setup(action: "Add")
                 vc.vetId = vetId
-                vc.actionButton.addAction {
-                    switch vc.validateModel {
-                    case let .sucssess(model):
-                        vc.dismiss(animated: true) {
-                            self.runPetActionTask(request, vetId, model)
-                        }
-                    case let .failure(message):
-                        self.navigator.showAlert(message: message)
-                    }
-                }
+                vc.delegate = self
             }
-        case .update(_):
-            break // handled by select action
-        case .delete(let model):
-            runPetActionTask(request, vetId, model)
-        case .select(let model):
-            navigator.pushPetInfo { vc in
-                let button = UIBarButtonItem(title: "Owner", style: .plain, target: nil, action: nil)
-                vc.navigationItem.rightBarButtonItem = button
-                button.addAction {
-                    self.showPetOwner(model.ownerId)
-                }
-                vc.setup(action: "Update", model: model)
-                vc.actionButton.addAction {
-                    switch vc.validateModel {
-                    case let .sucssess(model):
-                        vc.dismiss(animated: true) {
-                            self.runPetActionTask(request, vetId, model)
-                        }
-                    case let .failure(message):
-                        self.navigator.showAlert(message: message)
-                    }
-                }
+        case .update(_, _):
+            fatalError("Not implemented yet.")
+        case let .delete(model, completion):
+            let task = PetTask(.delete(model, completion), vetId: vetId)
+            self.run(task, message: action.message)
+        }
+    }
+
+    func petSelected(_ model: PetModel, vetId: Int, completion: @escaping PetsCompletion) {
+        navigator.pushPetInfo { vc in
+            let button = UIBarButtonItem(title: "Owner", style: .plain, target: nil, action: nil)
+            vc.navigationItem.rightBarButtonItem = button
+            vc.delegate = self
+            button.addAction {
+                self.showPetOwner(model.ownerId)
             }
+            vc.setup(action: "Update", model: model)
+//            vc.actionButton.addAction {
+//                switch vc.validateModel {
+//                case let .sucssess(model):
+//                    vc.dismiss(animated: true) {
+//                        let task = PetTask(.update(model, completion), vetId: vetId)
+//                        self.run(task, message: "Updating")
+//                    }
+//                case let .failure(message):
+//                    self.navigator.showAlert(message: message)
+//                }
+//            }
         }
     }
 }
 
-extension AppCoordinator: VetsViewControllerDelegate {
+extension AppCoordinator: VetUserActionDelegate {
 
-    func runVetActionTask(_ request: ActionRequest<VetModel>, _ model: VetModel? = nil) {
-        let task = TaskBuilder.build(dataService, request, model)
-        runTask(task: task)
-    }
-
-    func actionRequest(_ request: ActionRequest<VetModel>) {
-
-        switch request.action {
-        case .list:
-            runVetActionTask(request)
-        case .add:
-            navigator.showVetInfo { vc in
-                vc.setup(action: "Add")
-                vc.actionButton.addAction {
-                    switch vc.validateModel {
-                    case let .sucssess(model):
-                        vc.dismiss(animated: true) {
-                            self.runVetActionTask(request, model)
-                        }
-                    case let .failure(message):
-                        self.navigator.showAlert(message: message)
-                    }
-                }
-            }
-        case .update(let model):
-            navigator.showVetInfo { vc in
-                vc.setup(action: "Update", model: model)
-                vc.actionButton.addAction {
-                    switch vc.validateModel {
-                    case let .sucssess(model):
-                        vc.dismiss(animated: true) {
-                            self.runVetActionTask(request, model)
-                        }
-                    case let .failure(message):
-                        self.navigator.showAlert(message: message)
-                    }
-                }
-            }
-        case .delete(let model):
-            runVetActionTask(request, model)
-        case .select(let model):
-            guard let id = model.id else { preconditionFailure("Model assumed to have an id.")}
-            navigator.showPetList { vc in
-                vc.setup(delegate: self, vetId: id)
+    func vetSelected(_ model: VetModel) {
+        guard let id = model.id else { preconditionFailure("Model assumed to have an id.")}
+        navigator.showPetList { vc in
+            vc.setup(delegate: self, vetId: id)
+            self.dataService.pets(forVet: id) { models in
+                vc.dataCompletion(models)
             }
         }
-   }
+    }
+    func handle(_ action: UserAction<VetModel, VetsCompletion>) {
+        switch action {
+        case .add(_):
+            navigator.showVetInfo { vc in
+                vc.delegate = self
+                vc.setup(action: "Add")
+            }
+        case let .update(model, _):
+            navigator.showVetInfo { vc in
+                vc.delegate = self
+                vc.setup(action: "Update", model: model)
+            }
+        case let .delete(model, completion):
+            let task = VetTask(.delete(model, completion))
+            self.run(task, message: action.message)
+        }
+    }
+}
+
+extension AppCoordinator: PetInfoViewControllerDelegate, SearchTouchDelegate {
+    func handleSearchTouch(value: String) {
+        if let vc = navigator.topViewController as? PetInfoViewController {
+            vc.dismissViewController()
+            vc.breedTextField.text = value
+        }
+    }
+
+    func showBreedChooser(_ currentBreed: String?) {
+        let _: SearchViewController = navigator.presentModal(storyboardName: "Search", wrap: true) { vc in
+            vc.navigationController?.setLargeNavigation()
+            vc.title = "Breeds"
+            vc.data = Breeds.dogList
+            vc.delegate = self
+            vc.addDoneButton()
+            vc.navigationItem.rightBarButtonItem?.addAction {
+                vc.dismissViewController()
+            }
+        }
+    }
+    func petInfoDismiss(vetId: Int) { // adding pet
+        navigator.topViewController?.dismiss(animated: true) {
+            if let vc = self.navigator.topViewController as? PetsViewController {
+                self.fetchPets(vc, vetId)
+            }
+        }
+    }
+
+    func petInfoPop(vetId: Int) { // updating Pet
+        navigator.topViewController?.navigationController?.popViewController(animated: true) {
+            // need to refresh here because of potential name change would be stale
+            if let vc = self.navigator.topViewController as? PetsViewController {
+                self.fetchPets(vc, vetId)
+            }
+        }
+    }
+
+    func addPet(model: PetModel, vetId: Int, completion: @escaping () -> Void) {
+        let task = PetTask(.add(model, nil), vetId: vetId)
+        self.run(task, message: "Adding Pet") {
+            completion()
+        }
+    }
+
+    func updatePet(model: PetModel, vetId: Int, completion: @escaping () -> Void) {
+        let task = PetTask(.update(model, nil), vetId: vetId)
+        self.run(task, message: "Updating Pet") {
+            completion()
+        }
+    }
+
+    func petValidationFailed(message: String) {
+        self.navigator.showAlert(message: message)
+    }
+
+}
+
+extension AppCoordinator: VetInfoViewControllerDelegate {
+
+    func vetInfoDismiss() {
+        navigator.topViewController?.dismiss(animated: true) {
+            if let vc = self.navigator.topViewController as? VetsViewController {
+                self.fetchVets(vc)
+            }
+        }
+    }
+
+    func addVet(model: VetModel, completion: @escaping () -> Void) {
+        let task = VetTask(.add(model, nil))
+        self.run(task, message: "Adding Vet") {
+            completion()
+        }
+    }
+
+    func updateVet(model: VetModel, completion: @escaping () -> Void) {
+        let task = VetTask(.update(model, nil))
+        self.run(task, message: "Updating Vet") {
+            completion()
+        }
+    }
+
+    func vetValidationFailed(message: String) {
+        self.navigator.showAlert(message: message)
+    }
+
 }

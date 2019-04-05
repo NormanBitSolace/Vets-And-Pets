@@ -1,14 +1,12 @@
 import Foundation
 
-typealias PetOwnerModel = PetOwner
-
-struct PetOwner: Codable {
+struct PetOwnerModel: Codable {
     var id: Int?
     let firstName: String
     let lastName: String
 }
 
-extension PetOwner {
+extension PetOwnerModel {
     init(firstName: String, lastName: String) {
         self.firstName = firstName
         self.lastName = lastName

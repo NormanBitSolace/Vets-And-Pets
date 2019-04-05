@@ -1,20 +1,16 @@
 import UIKit
 
-protocol VetsViewControllerDelegate: class {
-    func actionRequest(_ request: ActionRequest<VetModel>)
-}
-
 protocol VetUserActionDelegate: class {
-    func handle(action: VetUserAction)
+    func handle(_ action: UserAction<VetModel, VetsCompletion>)
+    func vetSelected(_ model: VetModel)
 }
 
-enum VetUserAction {
-    case add(VetsCompletion)
-    case update(VetModel, VetsCompletion)
-    case delete(VetModel, VetsCompletion)
-    case select(VetModel)
+enum UserAction<M, C> {
+    case add(C)
+    case update(M, C)
+    case delete(M, C)
 
-    var action: String {
+    var message: String {
         switch self {
         case .add:
             return "Adding"
@@ -22,8 +18,6 @@ enum VetUserAction {
             return "Updating"
         case .delete:
             return "Deleting"
-        case .select:
-            return "Selecting"
         }
     }
 }
@@ -32,7 +26,7 @@ typealias VetsCompletion = ([VetModel]?) -> Void
 class VetsViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
-    weak var delegate: VetsViewControllerDelegate?
+    weak var delegate: VetUserActionDelegate!
     var dataDelegate: TableViewDelegate<VetModel, UITableViewCell>!
     lazy var dataCompletion: VetsCompletion = { models in
         self.dataDelegate.data = models
@@ -40,27 +34,10 @@ class VetsViewController: UIViewController {
     }
     func model(_ ip: IndexPath) -> VetModel? { return dataDelegate.data?[ip.row] }
 
-    func sendRequest(_ action: Action<VetModel>) {
-        guard let delegate = delegate else { return }
-        var request: ActionRequest<VetModel>
-        switch action {
-        case .add:
-            request = ActionRequest(action: .add(nil), completion: dataCompletion)
-        case .list:
-            request = ActionRequest(action: .list, completion: dataCompletion)
-        case .update(let model):
-            request = ActionRequest(action: .update(model), completion: dataCompletion)
-        case .delete(let model):
-            request = ActionRequest(action: .delete(model), completion: dataCompletion)
-        case .select(let model):
-            request = ActionRequest(action: .select(model), completion: dataCompletion)
-        }
-        delegate.actionRequest(request)
+    @objc func addVetButtonTap() {
+        delegate.handle(.add(dataCompletion))
     }
 
-    @objc func addVetButtonTap() {
-        sendRequest(.add(nil))
-    }
     final override func viewDidLoad() {
         super.viewDidLoad()
         dataDelegate = TableViewDelegate(
@@ -69,15 +46,15 @@ class VetsViewController: UIViewController {
                 cell.textLabel?.text = "\(model.firstName) \(model.lastName)"
                 cell.accessoryType = .disclosureIndicator
         }, touchDelegate: { (indexPath, model) in
-            self.sendRequest(.select(model))
+            self.delegate.vetSelected(model)
          })
         let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") { (action, indexPath) in
             guard let model = self.model(indexPath) else { return }
-            self.sendRequest(.delete(model))
+            self.delegate.handle(.delete(model, self.dataCompletion))
         }
         let editAction = UITableViewRowAction(style: .normal, title: "Edit") { (action, indexPath) in
             guard let model = self.model(indexPath) else { return }
-            self.sendRequest(.update(model))
+            self.delegate.handle(.update(model, self.dataCompletion))
         }
         dataDelegate.swipeActions = [deleteAction, editAction]
         tableView.setAutoSizeHeight()
@@ -86,9 +63,9 @@ class VetsViewController: UIViewController {
         rightButton(systemItem: .add, target: self, action: #selector(addVetButtonTap))
         title = "Vets"
     }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        sendRequest(.list)
-   }
+//
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        printTransitionStates()
+//    }
 }
