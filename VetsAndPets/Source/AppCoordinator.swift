@@ -1,12 +1,21 @@
 import UIKit
 import MapKit
 
+enum AppViewControllers {
+    case vets
+    case vetInfo(String, VetModel?)
+    case pets(Int)
+    case petInfoPush(String, PetModel)
+    case petInfoModal(String, Int)
+    case petOwnerInfo(Int?)
+    case breedSearch
+}
+
 final class AppCoordinator: NSObject {
 
     let loadingPresenter: LoadingPresenter
     let navigator: AppNavigator
     let dataService: DataService
-    let reachability = Reachability()!
 
     init(appNavigator: AppNavigator, dataService: DataService) {
         self.navigator = appNavigator
@@ -15,22 +24,10 @@ final class AppCoordinator: NSObject {
     }
 
     func start() {
-        NotificationCenter.default.addObserver(self, selector: #selector(reachabilityChanged(note:)), name: .reachabilityChanged, object: reachability)
-        do{
-            try reachability.startNotifier()
-        }catch{
-            print("could not start reachability notifier")
-        }
+        navigate(to: .vets)
     }
 
-    func showRootViewController() {
-        navigator.showVetList { vc in
-            vc.delegate = self
-            self.fetchVets(vc)
-       }
-    }
-
-    func fetchVets(_ vc: VetsViewController) {
+    func fetchVetsShowLoading(_ vc: VetsViewController) {
         self.loadingPresenter.show(message: "Getting Vets")
         self.dataService.vets { models in
             vc.dataCompletion(models)
@@ -38,7 +35,7 @@ final class AppCoordinator: NSObject {
         }
     }
 
-    func fetchPets(_ vc: PetsViewController, _ vetId: Int) {
+    func fetchPetsShowLoading(_ vc: PetsViewController, _ vetId: Int) {
         self.loadingPresenter.show(message: "Getting Pets")
         self.dataService.pets(forVet: vetId) { models in
             vc.dataCompletion(models)
@@ -46,34 +43,7 @@ final class AppCoordinator: NSObject {
         }
     }
 
-    @objc func reachabilityChanged(note: Notification) {
-        let reachability = note.object as! Reachability
-        switch reachability.connection {
-        case .wifi, .cellular:
-            print("Reachable via WiFi or Cellular")
-            showRootViewController()
-        case .none:
-            navigator.showAlert(message: "Network not reachable")
-        }
-    }
-
-    func showPetOwner(_ petOwnerId: Int?) {
-        navigator.showPetOwner { vc in
-            vc.delegate = self
-            if let id = petOwnerId {
-                self.dataService.petOwner(id: id) { owner in
-                    let action = owner == nil ? "Create" : "Update"
-                    DispatchQueue.main.async {
-                        vc.setup(action: action, model: owner)
-                    }
-                }
-            } else {
-                vc.setup(action: "Create")
-            }
-        }
-    }
-
-    func run(_ task: DataServiceTask, message: String, completion: (() -> Void)? = nil) {
+    func runShowLoading(_ task: DataServiceTask, message: String, completion: (() -> Void)? = nil) {
         self.loadingPresenter.show(message: message)
         task.run(dataService) {
             self.loadingPresenter.hide() {
@@ -84,17 +54,22 @@ final class AppCoordinator: NSObject {
 }
 
 extension AppCoordinator: PetOwnerInfoViewControllerDelegate {
-    func actionRequest(_ request: ActionRequest<PetOwnerModel>) {
-        switch request.action {
-        case .add(let model):
-            dataService.addPetOwner(model!, completion: nil)
-        case .update(let model):
-            dataService.addPetOwner(model, completion: nil)
-        default:
-            preconditionFailure("This app currently supports add and update PetOwner only.")
+
+    func addPetOwner(model: PetOwnerModel) {
+        dataService.addPetOwner(model) { _ in
+            DispatchQueue.main.async {
+                self.navigator.topViewController?.navigationController?.popViewController(animated: true)
+            }
         }
     }
 
+    func updatePetOwner(model: PetOwnerModel) {
+        dataService.updatePetOwner(model) { _ in
+            DispatchQueue.main.async {
+                self.navigator.topViewController?.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
 }
 
 extension AppCoordinator: PetUserActionDelegate {
@@ -102,40 +77,17 @@ extension AppCoordinator: PetUserActionDelegate {
     func handle(_ action: UserAction<PetModel, PetsCompletion>, vetId: Int) {
         switch action {
         case .add(_):
-            navigator.showPetInfo { vc in
-                vc.setup(action: "Add")
-                vc.vetId = vetId
-                vc.delegate = self
-            }
+            navigate(to: .petInfoModal("Add", vetId))
         case .update(_, _):
             fatalError("Not implemented yet.")
         case let .delete(model, completion):
             let task = PetTask(.delete(model, completion), vetId: vetId)
-            self.run(task, message: action.message)
+            self.runShowLoading(task, message: action.message)
         }
     }
 
     func petSelected(_ model: PetModel, vetId: Int, completion: @escaping PetsCompletion) {
-        navigator.pushPetInfo { vc in
-            let button = UIBarButtonItem(title: "Owner", style: .plain, target: nil, action: nil)
-            vc.navigationItem.rightBarButtonItem = button
-            vc.delegate = self
-            button.addAction {
-                self.showPetOwner(model.ownerId)
-            }
-            vc.setup(action: "Update", model: model)
-//            vc.actionButton.addAction {
-//                switch vc.validateModel {
-//                case let .sucssess(model):
-//                    vc.dismiss(animated: true) {
-//                        let task = PetTask(.update(model, completion), vetId: vetId)
-//                        self.run(task, message: "Updating")
-//                    }
-//                case let .failure(message):
-//                    self.navigator.showAlert(message: message)
-//                }
-//            }
-        }
+        navigate(to: .petInfoPush("Update", model))
     }
 }
 
@@ -143,33 +95,24 @@ extension AppCoordinator: VetUserActionDelegate {
 
     func vetSelected(_ model: VetModel) {
         guard let id = model.id else { preconditionFailure("Model assumed to have an id.")}
-        navigator.showPetList { vc in
-            vc.setup(delegate: self, vetId: id)
-            self.dataService.pets(forVet: id) { models in
-                vc.dataCompletion(models)
-            }
-        }
+        navigate(to: .pets(id))
     }
+
     func handle(_ action: UserAction<VetModel, VetsCompletion>) {
         switch action {
         case .add(_):
-            navigator.showVetInfo { vc in
-                vc.delegate = self
-                vc.setup(action: "Add")
-            }
+            navigate(to: .vetInfo("Add", nil))
         case let .update(model, _):
-            navigator.showVetInfo { vc in
-                vc.delegate = self
-                vc.setup(action: "Update", model: model)
-            }
+            navigate(to: .vetInfo("Update", model))
         case let .delete(model, completion):
             let task = VetTask(.delete(model, completion))
-            self.run(task, message: action.message)
+            self.runShowLoading(task, message: action.message)
         }
     }
 }
 
 extension AppCoordinator: PetInfoViewControllerDelegate, SearchTouchDelegate {
+
     func handleSearchTouch(value: String) {
         if let vc = navigator.topViewController as? PetInfoViewController {
             vc.dismissViewController()
@@ -178,21 +121,17 @@ extension AppCoordinator: PetInfoViewControllerDelegate, SearchTouchDelegate {
     }
 
     func showBreedChooser(_ currentBreed: String?) {
-        let _: SearchViewController = navigator.presentModal(storyboardName: "Search", wrap: true) { vc in
-            vc.navigationController?.setLargeNavigation()
-            vc.title = "Breeds"
-            vc.data = Breeds.dogList
-            vc.delegate = self
-            vc.addDoneButton()
-            vc.navigationItem.rightBarButtonItem?.addAction {
-                vc.dismissViewController()
-            }
-        }
+        navigate(to: .breedSearch)
     }
+
+    private func petsIsTopViewController() -> PetsViewController? {
+        return navigator.topViewController as? PetsViewController
+    }
+
     func petInfoDismiss(vetId: Int) { // adding pet
         navigator.topViewController?.dismiss(animated: true) {
-            if let vc = self.navigator.topViewController as? PetsViewController {
-                self.fetchPets(vc, vetId)
+            if let vc = self.petsIsTopViewController() {
+                self.fetchPetsShowLoading(vc, vetId)
             }
         }
     }
@@ -200,22 +139,22 @@ extension AppCoordinator: PetInfoViewControllerDelegate, SearchTouchDelegate {
     func petInfoPop(vetId: Int) { // updating Pet
         navigator.topViewController?.navigationController?.popViewController(animated: true) {
             // need to refresh here because of potential name change would be stale
-            if let vc = self.navigator.topViewController as? PetsViewController {
-                self.fetchPets(vc, vetId)
+            if let vc = self.petsIsTopViewController() {
+                self.fetchPetsShowLoading(vc, vetId)
             }
         }
     }
 
     func addPet(model: PetModel, vetId: Int, completion: @escaping () -> Void) {
         let task = PetTask(.add(model, nil), vetId: vetId)
-        self.run(task, message: "Adding Pet") {
+        self.runShowLoading(task, message: "Adding Pet") {
             completion()
         }
     }
 
     func updatePet(model: PetModel, vetId: Int, completion: @escaping () -> Void) {
         let task = PetTask(.update(model, nil), vetId: vetId)
-        self.run(task, message: "Updating Pet") {
+        self.runShowLoading(task, message: "Updating Pet") {
             completion()
         }
     }
@@ -223,35 +162,135 @@ extension AppCoordinator: PetInfoViewControllerDelegate, SearchTouchDelegate {
     func petValidationFailed(message: String) {
         self.navigator.showAlert(message: message)
     }
-
 }
 
 extension AppCoordinator: VetInfoViewControllerDelegate {
 
+    private func vetsIsTopViewController() -> VetsViewController? {
+        return navigator.topViewController as? VetsViewController
+    }
+
     func vetInfoDismiss() {
         navigator.topViewController?.dismiss(animated: true) {
-            if let vc = self.navigator.topViewController as? VetsViewController {
-                self.fetchVets(vc)
+            if let vc = self.vetsIsTopViewController() {
+                self.fetchVetsShowLoading(vc)
             }
         }
     }
 
     func addVet(model: VetModel, completion: @escaping () -> Void) {
         let task = VetTask(.add(model, nil))
-        self.run(task, message: "Adding Vet") {
+        self.runShowLoading(task, message: "Adding Vet") {
             completion()
         }
     }
 
     func updateVet(model: VetModel, completion: @escaping () -> Void) {
         let task = VetTask(.update(model, nil))
-        self.run(task, message: "Updating Vet") {
+        self.runShowLoading(task, message: "Updating Vet") {
             completion()
         }
     }
 
     func vetValidationFailed(message: String) {
         self.navigator.showAlert(message: message)
+    }
+
+}
+
+fileprivate extension AppCoordinator {
+
+    func navigate(to: AppViewControllers) {
+
+        func showRootViewController() {
+            navigator.showVetList { vc in
+                vc.delegate = self
+                self.fetchVetsShowLoading(vc)
+            }
+        }
+
+        func showVetInfo(action: String, model: VetModel? = nil) {
+            navigator.showVetInfo { vc in
+                vc.delegate = self
+                vc.setup(action: action, model: model)
+            }
+        }
+
+        func showPetList(_ vetId: Int) {
+            navigator.showPetList { vc in
+                vc.setup(delegate: self, vetId: vetId)
+                self.dataService.pets(forVet: vetId) { models in
+                    vc.dataCompletion(models)
+                }
+            }
+        }
+
+        func showPetInfoModal(action: String, vetId: Int) {
+            navigator.showPetInfo { vc in
+                vc.setup(action: action)
+                vc.vetId = vetId
+                vc.delegate = self
+            }
+        }
+
+        func showPetInfoPush(action: String, model: PetModel) {
+            navigator.pushPetInfo { vc in
+                let button = UIBarButtonItem(title: "Owner", style: .plain, target: nil, action: nil)
+                vc.navigationItem.rightBarButtonItem = button
+                vc.delegate = self
+                button.addAction {
+                    self.navigate(to: .petOwnerInfo(model.ownerId))
+                    //                self.showPetOwner(model.ownerId)
+                }
+                vc.setup(action: "Update", model: model)
+            }
+        }
+
+        func showPetOwner(_ petOwnerId: Int?) {
+            navigator.showPetOwner { vc in
+                vc.delegate = self
+                if let id = petOwnerId {
+                    self.dataService.petOwner(id: id) { owner in
+                        let action = owner == nil ? "Create" : "Update"
+                        DispatchQueue.main.async {
+                            vc.setup(action: action, model: owner)
+                        }
+                    }
+                } else {
+                    vc.setup(action: "Create")
+                }
+            }
+        }
+
+        func showBreedSearch() {
+            navigator.showBreedSearch { vc in
+                vc.navigationController?.setLargeNavigation()
+                vc.title = "Breeds"
+                vc.data = Breeds.dogList
+                vc.delegate = self
+                vc.addDoneButton()
+                vc.navigationItem.rightBarButtonItem?.addAction {
+                    vc.dismissViewController()
+                }
+            }
+        }
+
+        switch to {
+        case .vets:
+            showRootViewController()
+        case let .vetInfo(action, model):
+            showVetInfo(action: action, model: model)
+        case let .pets(vetId):
+            showPetList(vetId)
+        case let .petInfoPush(action, model):
+            showPetInfoPush(action: action, model: model)
+        case let .petInfoModal(action, vetId):
+            showPetInfoModal(action: action, vetId: vetId)
+        case let .petOwnerInfo(petOwnerId):
+            showPetOwner(petOwnerId)
+        case .breedSearch:
+            showBreedSearch()
+        }
     }
 
 }

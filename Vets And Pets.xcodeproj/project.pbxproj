@@ -13,8 +13,6 @@
 		9403C3462253E006002D86C5 /* PetsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9403C3422253E006002D86C5 /* PetsViewController.swift */; };
 		9403C3472253E006002D86C5 /* PetInfo.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9403C3432253E006002D86C5 /* PetInfo.storyboard */; };
 		9420BC4F22544113002801C1 /* Breeds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9420BC4E22544113002801C1 /* Breeds.swift */; };
-		9420BC512254FDFF002801C1 /* Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9420BC502254FDFF002801C1 /* Actions.swift */; };
-		9420BC5322551EAD002801C1 /* TaskBuilders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9420BC5222551EAD002801C1 /* TaskBuilders.swift */; };
 		9420BC552255390F002801C1 /* AppNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9420BC542255390F002801C1 /* AppNavigator.swift */; };
 		9420BE8722554E41002801C1 /* PetOwnerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9420BE8622554E40002801C1 /* PetOwnerModel.swift */; };
 		9420BE8E22556EE0002801C1 /* PetOwnerInfo.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9420BE8A22556EDF002801C1 /* PetOwnerInfo.storyboard */; };
@@ -67,8 +65,6 @@
 		9403C3422253E006002D86C5 /* PetsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PetsViewController.swift; sourceTree = "<group>"; };
 		9403C3432253E006002D86C5 /* PetInfo.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = PetInfo.storyboard; sourceTree = "<group>"; };
 		9420BC4E22544113002801C1 /* Breeds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Breeds.swift; sourceTree = "<group>"; };
-		9420BC502254FDFF002801C1 /* Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Actions.swift; sourceTree = "<group>"; };
-		9420BC5222551EAD002801C1 /* TaskBuilders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskBuilders.swift; sourceTree = "<group>"; };
 		9420BC542255390F002801C1 /* AppNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNavigator.swift; sourceTree = "<group>"; };
 		9420BE8622554E40002801C1 /* PetOwnerModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PetOwnerModel.swift; sourceTree = "<group>"; };
 		9420BE8A22556EDF002801C1 /* PetOwnerInfo.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = PetOwnerInfo.storyboard; sourceTree = "<group>"; };
@@ -272,7 +268,6 @@
 		94E41D5022513199006BD06B /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				9420BC502254FDFF002801C1 /* Actions.swift */,
 				94E41D80225136F8006BD06B /* AppCoordinator.swift */,
 				94E41D5122513199006BD06B /* AppDelegate.swift */,
 				9420BC542255390F002801C1 /* AppNavigator.swift */,
@@ -280,7 +275,6 @@
 				9403C33C2253C935002D86C5 /* DataServiceTask.swift */,
 				94E41D90225137B3006BD06B /* Models */,
 				94E41D8E22513786006BD06B /* PetService.swift */,
-				9420BC5222551EAD002801C1 /* TaskBuilders.swift */,
 				94E41D82225136F9006BD06B /* ViewControllers */,
 			);
 			path = Source;
@@ -395,7 +389,6 @@
 				949B753622569F0B004056C7 /* RestHelper.swift in Sources */,
 				94E41D942251383A006BD06B /* VetModel.swift in Sources */,
 				949B754322569F0B004056C7 /* Data+Extensions.swift in Sources */,
-				9420BC512254FDFF002801C1 /* Actions.swift in Sources */,
 				94E41D932251383A006BD06B /* PetModel.swift in Sources */,
 				94D082822257EC34006E87B9 /* SearchViewController.swift in Sources */,
 				949B753B22569F0B004056C7 /* ArrayExtensions.swift in Sources */,
@@ -411,7 +404,6 @@
 				94E41D8F22513786006BD06B /* PetService.swift in Sources */,
 				949B754D22569F0B004056C7 /* Navigator.swift in Sources */,
 				9403C3452253E006002D86C5 /* PetInfoViewController.swift in Sources */,
-				9420BC5322551EAD002801C1 /* TaskBuilders.swift in Sources */,
 				949B754422569F0B004056C7 /* LoadingPresenter.swift in Sources */,
 				949B753822569F0B004056C7 /* NetworkError.swift in Sources */,
 				949B753522569F0B004056C7 /* Reachability.swift in Sources */,
