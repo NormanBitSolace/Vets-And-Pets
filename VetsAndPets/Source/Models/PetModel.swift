@@ -16,9 +16,10 @@ struct PetModel: Codable {
 
 extension PetModel {
 
-    init(id: Int?, practitionerId: Int, firstName: String, lastName: String, breed: String, dob: String, isFemale: Bool, isSpayedOrNeutered: Bool) {
+    init(id: Int?, practitionerId: Int, ownerId: Int?, firstName: String, lastName: String, breed: String, dob: String, isFemale: Bool, isSpayedOrNeutered: Bool) {
         self.id = id
         self.practitionerId = practitionerId
+        self.ownerId = ownerId
         self.firstName = firstName
         self.lastName = lastName
         self.breed = breed

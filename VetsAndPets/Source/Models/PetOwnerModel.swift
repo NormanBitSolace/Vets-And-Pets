@@ -2,12 +2,14 @@ import Foundation
 
 struct PetOwnerModel: Codable {
     var id: Int?
+    var petId: Int?
     let firstName: String
     let lastName: String
 }
 
 extension PetOwnerModel {
-    init(firstName: String, lastName: String) {
+    init(petId: Int?, firstName: String, lastName: String) {
+        self.petId = petId
         self.firstName = firstName
         self.lastName = lastName
     }

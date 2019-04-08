@@ -6,8 +6,7 @@ protocol PetInfoViewControllerDelegate: class {
     func addPet(model: PetModel, vetId: Int, completion: @escaping PetInfoCompletion)
     func updatePet(model: PetModel, vetId: Int, completion: @escaping PetInfoCompletion)
     func petValidationFailed(message: String)
-    func petInfoDismiss(vetId: Int)
-    func petInfoPop(vetId: Int)
+    func petInfoDismiss(vetId: Int, vc: UIViewController)
     func showBreedChooser(_ currentBreed: String?)
 }
 
@@ -25,6 +24,18 @@ final class PetInfoViewController: UIViewController {
 
     var model: PetModel? { return createViewModel() }
     var id: Int?
+    var ownerId: Int? {
+        didSet {
+            // Occurs when an owner is added, so update Owner button action
+            // to show newly added Owner
+            let completion: PetInfoCompletion = {
+                self.delegate.petInfoDismiss(vetId: self.vetId, vc: self)
+            }
+            actionButton.addAction {
+                self.delegate.addPet(model: self.model!, vetId: self.vetId, completion: completion)
+            }
+        }
+    }
     var vetId: Int!
     weak var delegate: PetInfoViewControllerDelegate!
 
@@ -41,6 +52,7 @@ final class PetInfoViewController: UIViewController {
             let dob = dateTextField.text else { return nil }
         return PetModel(id: self.id,
                         practitionerId: pid,
+                        ownerId: ownerId,
                         firstName: first,
                         lastName: last,
                         breed: breed,
@@ -78,6 +90,7 @@ final class PetInfoViewController: UIViewController {
         isSpayedOrNeutered.isOn = model.isSpayedOrNeutered
         id = model.id
         vetId = model.practitionerId
+        ownerId = model.ownerId
     }
 
      private var missingFieldsMessage: String? {
@@ -96,13 +109,16 @@ final class PetInfoViewController: UIViewController {
         }
 
         let isNewPet = model == nil
+        let completion: PetInfoCompletion = {
+            self.delegate.petInfoDismiss(vetId: self.vetId, vc: self)
+        }
         actionButton.addAction {
             switch self.validateModel {
             case let .sucssess(model):
                 if isNewPet {
-                    self.delegate.addPet(model: model, vetId: self.vetId) { self.delegate.petInfoDismiss(vetId: self.vetId) }
+                    self.delegate.addPet(model: model, vetId: self.vetId, completion: completion)
                 } else {
-                    self.delegate.updatePet(model: model, vetId: self.vetId) { self.delegate.petInfoPop(vetId: self.vetId) }
+                    self.delegate.updatePet(model: model, vetId: self.vetId, completion: completion)
                 }
             case let .failure(message):
                 self.delegate.petValidationFailed(message: message)

@@ -7,7 +7,7 @@ enum AppViewControllers {
     case pets(Int)
     case petInfoPush(String, PetModel)
     case petInfoModal(String, Int)
-    case petOwnerInfo(Int?)
+    case petOwnerInfo(Int?, Int?)
     case breedSearch
 }
 
@@ -56,18 +56,18 @@ final class AppCoordinator: NSObject {
 extension AppCoordinator: PetOwnerInfoViewControllerDelegate {
 
     func addPetOwner(model: PetOwnerModel) {
-        dataService.addPetOwner(model) { _ in
-            DispatchQueue.main.async {
-                self.navigator.topViewController?.navigationController?.popViewController(animated: true)
+        dataService.addPetOwner(model) { model in
+            self.navigator.topViewController?.navigationController?.popViewController(animated: true) {
+                if let vc = self.navigator.topViewController as? PetInfoViewController {
+                    vc.ownerId = model?.id
+                }
             }
         }
     }
 
     func updatePetOwner(model: PetOwnerModel) {
         dataService.updatePetOwner(model) { _ in
-            DispatchQueue.main.async {
-                self.navigator.topViewController?.navigationController?.popViewController(animated: true)
-            }
+            self.navigator.topViewController?.navigationController?.popViewController(animated: true)
         }
     }
 }
@@ -113,10 +113,19 @@ extension AppCoordinator: VetUserActionDelegate {
 
 extension AppCoordinator: PetInfoViewControllerDelegate, SearchTouchDelegate {
 
-    func handleSearchTouch(value: String) {
-        if let vc = navigator.topViewController as? PetInfoViewController {
-            vc.dismissViewController()
-            vc.breedTextField.text = value
+
+    /// Handles result sent from breed search view controller. This may have been pushed
+    /// or presented so the presentingViewController is used to dismiss.
+    /// - Parameters:
+    ///   - value: Breed of dog selected from search view.
+    ///   - vc: The search view controller.
+    func handleSearchTouch(value: String, vc: UIViewController) {
+        if let nvc = vc.presentingViewController as? UINavigationController {
+            nvc.dismiss(animated: true) {
+                if let pivc = nvc.topViewController as? PetInfoViewController {
+                    pivc.breedTextField.text = value
+                }
+            }
         }
     }
 
@@ -124,24 +133,16 @@ extension AppCoordinator: PetInfoViewControllerDelegate, SearchTouchDelegate {
         navigate(to: .breedSearch)
     }
 
-    private func petsIsTopViewController() -> PetsViewController? {
-        return navigator.topViewController as? PetsViewController
-    }
-
-    func petInfoDismiss(vetId: Int) { // adding pet
-        navigator.topViewController?.dismiss(animated: true) {
-            if let vc = self.petsIsTopViewController() {
-                self.fetchPetsShowLoading(vc, vetId)
+    func petInfoDismiss(vetId: Int, vc: UIViewController) {
+        let completion: () -> Void = {
+            if let pvc = self.navigator.topViewController as? PetsViewController {
+                self.fetchPetsShowLoading(pvc, vetId)
             }
         }
-    }
-
-    func petInfoPop(vetId: Int) { // updating Pet
-        navigator.topViewController?.navigationController?.popViewController(animated: true) {
-            // need to refresh here because of potential name change would be stale
-            if let vc = self.petsIsTopViewController() {
-                self.fetchPetsShowLoading(vc, vetId)
-            }
+        if let nvc = vc.presentingViewController as? UINavigationController { // adding pet
+            nvc.dismiss(animated: true, completion: completion)
+        } else { // updating pet
+            navigator.rootNavigationController.popViewController(animated: true, completion: completion)
         }
     }
 
@@ -239,22 +240,21 @@ fileprivate extension AppCoordinator {
                 vc.navigationItem.rightBarButtonItem = button
                 vc.delegate = self
                 button.addAction {
-                    self.navigate(to: .petOwnerInfo(model.ownerId))
+                    self.navigate(to: .petOwnerInfo(model.id, model.ownerId))
                     //                self.showPetOwner(model.ownerId)
                 }
                 vc.setup(action: "Update", model: model)
             }
         }
 
-        func showPetOwner(_ petOwnerId: Int?) {
+        func showPetOwner(_ petId: Int?, _ petOwnerId: Int?) {
             navigator.showPetOwner { vc in
                 vc.delegate = self
+                vc.petId = petId
                 if let id = petOwnerId {
                     self.dataService.petOwner(id: id) { owner in
                         let action = owner == nil ? "Create" : "Update"
-                        DispatchQueue.main.async {
-                            vc.setup(action: action, model: owner)
-                        }
+                        vc.setup(action: action, model: owner)
                     }
                 } else {
                     vc.setup(action: "Create")
@@ -286,8 +286,8 @@ fileprivate extension AppCoordinator {
             showPetInfoPush(action: action, model: model)
         case let .petInfoModal(action, vetId):
             showPetInfoModal(action: action, vetId: vetId)
-        case let .petOwnerInfo(petOwnerId):
-            showPetOwner(petOwnerId)
+        case let .petOwnerInfo(petId, petOwnerId):
+            showPetOwner(petId, petOwnerId)
         case .breedSearch:
             showBreedSearch()
         }

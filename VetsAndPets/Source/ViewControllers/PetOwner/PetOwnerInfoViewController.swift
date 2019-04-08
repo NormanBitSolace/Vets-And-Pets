@@ -16,6 +16,7 @@ final class PetOwnerInfoViewController: UIViewController {
 
     var model: PetOwnerModel? { return createViewModel() }
     var id: Int?
+    var petId: Int?
     weak var delegate: PetOwnerInfoViewControllerDelegate!
 
     override func viewDidLoad() {
@@ -36,6 +37,7 @@ final class PetOwnerInfoViewController: UIViewController {
         guard let first = firstName.text,
             let last = lastName.text else { return nil }
         return PetOwnerModel(id: self.id,
+                    petId: petId,
                     firstName: first,
                     lastName: last
         )
@@ -43,6 +45,7 @@ final class PetOwnerInfoViewController: UIViewController {
 
     private func applyModel(_ model: PetOwnerModel) {
         id = model.id
+        petId = model.petId
         firstName.text = model.firstName
         lastName.text = model.lastName
     }
