@@ -6,7 +6,15 @@ class TableViewDelegate<ModelType, CellType: UITableViewCell>: NSObject, UITable
     let decorator: (UITableViewCell, ModelType) -> Void
     let touchDelegate: ((IndexPath, ModelType) -> Void)?
     var swipeActions: [UITableViewRowAction]?
-    var data: [ModelType]?
+    var data: [ModelType]? {
+        didSet { self.tableView?.reloadOnMain() }
+    }
+    weak var tableView: UITableView? {
+        didSet {
+            tableView?.delegate = self
+            tableView?.dataSource = self
+        }
+    }
 
     init<CellType: UITableViewCell>(data: [ModelType]? = nil,
                                     cellType: CellType.Type? = nil,
@@ -16,6 +24,10 @@ class TableViewDelegate<ModelType, CellType: UITableViewCell>: NSObject, UITable
         self.cellIdentifier = cellType == nil ? nil : String(describing: CellType.self)
         self.decorator = decorator
         self.touchDelegate = touchDelegate
+    }
+
+    func model(_ indexPath: IndexPath) -> ModelType? {
+        return data?[indexPath.row]
     }
 
     final func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -46,15 +58,11 @@ class TableViewDelegate<ModelType, CellType: UITableViewCell>: NSObject, UITable
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
-    final func setDelegate(_ tableView: UITableView) {
-        tableView.delegate = self
-        tableView.dataSource = self
-    }
-
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         return swipeActions
     }
 }
+
 extension UITableView {
     final func setAutoSizeHeight(_ estimatedRowHeight: CGFloat = 44) {
         self.estimatedRowHeight = estimatedRowHeight

@@ -5,3 +5,7 @@ enum NetworkError: Error {
     case unknownError
     case messageError(String)
 }
+
+protocol NetworkObserver {
+    func setModels<T>(_ models: [T]?)
+}

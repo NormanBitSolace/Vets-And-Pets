@@ -16,6 +16,7 @@ class SearchViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // TODO move TableViewDelegate out like pet and vet VC
         dataDelegate = TableViewDelegate(
             data: data,
             cellType: nil,
@@ -25,7 +26,7 @@ class SearchViewController: UITableViewController {
             self.delegate?.handleSearchTouch(value: model, vc: self)
         })
         tableView.setAutoSizeHeight()
-        dataDelegate.setDelegate(tableView)
+        dataDelegate.tableView = tableView
     }
 
     override func viewWillAppear(_ animated: Bool) {

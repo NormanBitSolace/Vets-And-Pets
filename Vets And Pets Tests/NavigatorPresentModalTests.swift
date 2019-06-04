@@ -3,113 +3,125 @@ import XCTest
 
 class NavigatorPresentModalTests: XCTestCase {
 
-    static let navigator = Navigator()
-
     override class func setUp() {
         super.setUp()
         Navigator.bundle = Bundle(for: NavigatorPresentModalTests.self)
-        navigator.root(type: OrangeViewController.self, storyboardName: "Orange") { _ in }
     }
 
     override func setUp() { }
 
     override func tearDown() { }
 
+    private func createNavigator() -> Navigator {
+        let navigator = Navigator()
+        navigator.root(type: OrangeViewController.self, storyboardName: "Orange") { vc in
+            // Testing fix, see: https://www.natashatherobot.com/ios-testing-view-controllers-swift/
+            let _ = navigator.rootNavigationController.view
+            let _ = vc.view
+
+        }
+        return navigator
+    }
+
     func testPresentModalUIViewControllerCompletion() {
-        let _: CompletionViewController = NavigatorPresentModalTests.navigator.presentModal(completion: { vc in
+        let _: CompletionViewController = createNavigator().presentModal(completion: { vc in
             XCTAssertTrue(vc.loaded)
             XCTAssertTrue(vc.didWillAppear)
             XCTAssertTrue(vc.didAppear)
         })
     }
 
-    func testPresentModalUIViewController() {
-        let vcInferred = NavigatorPresentModalTests.navigator.presentModal()
+    func testPresentModalUIViewControllerInferred() {
+        let vcInferred = createNavigator().presentModal()
         XCTAssertNotNil(vcInferred)
         XCTAssertNil(vcInferred.navigationController)
         XCTAssertEqual("UIViewController", String(describing: vcInferred.classForCoder))
-
-        let vc: UIViewController = NavigatorPresentModalTests.navigator.presentModal()
+    }
+    func testPresentModalUIViewController() {
+        let vc: UIViewController = createNavigator().presentModal()
         XCTAssertNotNil(vc)
         XCTAssertNil(vc.navigationController)
         XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
     }
 
-    func testPresentModalUIViewControllerWrap() {
-        let vcInferred = NavigatorPresentModalTests.navigator.presentModal(wrap: true)
+    func testPresentModalUIViewControllerWrapInferred() {
+        let vcInferred = createNavigator().presentModal(wrap: true)
         XCTAssertNotNil(vcInferred)
         XCTAssertNotNil(vcInferred.navigationController)
         XCTAssertEqual("UIViewController", String(describing: vcInferred.classForCoder))
-
-        let vc: UIViewController = NavigatorPresentModalTests.navigator.presentModal(wrap: true)
+    }
+    func testPresentModalUIViewControllerWrap() {
+        let vc: UIViewController = createNavigator().presentModal(wrap: true)
         XCTAssertNotNil(vc)
-        XCTAssertNotNil(vcInferred.navigationController)
+        XCTAssertNotNil(vc.navigationController)
        XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
     }
 
     func testPresentModalCustomViewController() {
-        let vc: OrangeViewController = NavigatorPresentModalTests.navigator.presentModal()
+        let vc: OrangeViewController = createNavigator().presentModal()
         XCTAssertNotNil(vc)
         XCTAssertNil(vc.navigationController)
         XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
     }
 
     func testPresentModalCustomViewControllerWrap() {
-        let vc: OrangeViewController = NavigatorPresentModalTests.navigator.presentModal(wrap: true)
+        let vc: OrangeViewController = createNavigator().presentModal(wrap: true)
         XCTAssertNotNil(vc)
         XCTAssertNotNil(vc.navigationController)
         XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
     }
 
     func testPresentModalWithStoryboard() {
-        let vc: OrangeViewController = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Orange")
+        let vc: OrangeViewController = createNavigator().presentModal(storyboardName: "Orange")
         XCTAssertNotNil(vc)
         XCTAssertNil(vc.navigationController)
         XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
-        let unspecifiedVC = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Orange")
+    }
+    func testPresentModalWithStoryboardInferred() {
+        let unspecifiedVC = createNavigator().presentModal(storyboardName: "Orange")
         XCTAssertNotNil(unspecifiedVC)
         XCTAssertEqual("OrangeViewController", String(describing: unspecifiedVC.classForCoder))
     }
 
     func testPresentModalWithStoryboardWrap() {
-        let vc: OrangeViewController = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Orange", wrap: true)
+        let vc: OrangeViewController = createNavigator().presentModal(storyboardName: "Orange", wrap: true)
         XCTAssertNotNil(vc)
         XCTAssertNotNil(vc.navigationController)
         XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
-        let unspecifiedVC = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Orange")
+    }
+    func testPresentModalWithStoryboardWrapInferred() {
+        let unspecifiedVC = createNavigator().presentModal(storyboardName: "Orange")
         XCTAssertNotNil(unspecifiedVC)
         XCTAssertEqual("OrangeViewController", String(describing: unspecifiedVC.classForCoder))
     }
 
     func testPresentModalWithUnassociatedStoryboard() {
-        let vc: UIViewController = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Unassociated")
+        let vc: UIViewController = createNavigator().presentModal(storyboardName: "Unassociated")
         XCTAssertNotNil(vc)
         XCTAssertNil(vc.navigationController)
         XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
-        let unspecifiedVC = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Unassociated")
+    }
+    func testPresentModalWithUnassociatedStoryboardInferred() {
+        let unspecifiedVC = createNavigator().presentModal(storyboardName: "Unassociated")
         XCTAssertNotNil(unspecifiedVC)
         XCTAssertEqual("UIViewController", String(describing: unspecifiedVC.classForCoder))
     }
 
     func testPresentModalWithUnassociatedStoryboardWrap() {
-        let vc: UIViewController = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Unassociated", wrap: true)
+        let vc: UIViewController = createNavigator().presentModal(storyboardName: "Unassociated", wrap: true)
         XCTAssertNotNil(vc)
         XCTAssertNotNil(vc.navigationController)
         XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
-        let unspecifiedVC = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Unassociated", wrap: true)
+    }
+    func testPresentModalWithUnassociatedStoryboardWrapInferred() {
+        let unspecifiedVC = createNavigator().presentModal(storyboardName: "Unassociated", wrap: true)
         XCTAssertNotNil(unspecifiedVC)
-        XCTAssertNotNil(vc.navigationController)
+        XCTAssertNotNil(unspecifiedVC.navigationController)
         XCTAssertEqual("UIViewController", String(describing: unspecifiedVC.classForCoder))
     }
 
     func testPresentModalUIViewControllerConfigure() {
-        NavigatorPresentModalTests.navigator.presentModal() { vc in
-            XCTAssertNotNil(vc)
-            XCTAssertNil(vc.navigationController)
-           XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
-        }
-
-        NavigatorPresentModalTests.navigator.presentModal() { vc in
+        createNavigator().presentModal() { vc in
             XCTAssertNotNil(vc)
             XCTAssertNil(vc.navigationController)
             XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
@@ -117,13 +129,7 @@ class NavigatorPresentModalTests: XCTestCase {
     }
 
     func testPresentModalUIViewControllerConfigureWrap() {
-        NavigatorPresentModalTests.navigator.presentModal(wrap: true) { vc in
-            XCTAssertNotNil(vc)
-            XCTAssertNotNil(vc.navigationController)
-            XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
-        }
-
-        NavigatorPresentModalTests.navigator.presentModal(wrap: true) { vc in
+        createNavigator().presentModal(wrap: true) { vc in
             XCTAssertNotNil(vc)
             XCTAssertNotNil(vc.navigationController)
             XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
@@ -131,7 +137,7 @@ class NavigatorPresentModalTests: XCTestCase {
     }
 
     func testPresentModalCustomViewControllerConfigure() {
-        let _: OrangeViewController = NavigatorPresentModalTests.navigator.presentModal() { vc in
+        let _: OrangeViewController = createNavigator().presentModal() { vc in
             XCTAssertNotNil(vc)
             XCTAssertNil(vc.navigationController)
             XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
@@ -139,7 +145,7 @@ class NavigatorPresentModalTests: XCTestCase {
     }
 
     func testPresentModalCustomViewControllerConfigureWrap() {
-        let _: OrangeViewController = NavigatorPresentModalTests.navigator.presentModal(wrap: true) { vc in
+        let _: OrangeViewController = createNavigator().presentModal(wrap: true) { vc in
             XCTAssertNotNil(vc)
             XCTAssertNotNil(vc.navigationController)
             XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
@@ -147,12 +153,14 @@ class NavigatorPresentModalTests: XCTestCase {
     }
 
     func testPresentModalWithStoryboardConfigure() {
-        let _: OrangeViewController = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Orange") { vc in
+        let _: OrangeViewController = createNavigator().presentModal(storyboardName: "Orange") { vc in
             XCTAssertNotNil(vc)
             XCTAssertNil(vc.navigationController)
             XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
         }
-        NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Orange") { vc in
+    }
+    func testPresentModalWithStoryboardConfigureInferred() {
+        createNavigator().presentModal(storyboardName: "Orange") { vc in
             XCTAssertNotNil(vc)
             XCTAssertNil(vc.navigationController)
             XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
@@ -160,12 +168,14 @@ class NavigatorPresentModalTests: XCTestCase {
     }
 
     func testPresentModalWithStoryboardConfigureWrap() {
-        let _: OrangeViewController = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Orange", wrap: true) { vc in
+        let _: OrangeViewController = createNavigator().presentModal(storyboardName: "Orange", wrap: true) { vc in
             XCTAssertNotNil(vc)
             XCTAssertNotNil(vc.navigationController)
             XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
         }
-        NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Orange", wrap: true) { vc in
+    }
+    func testPresentModalWithStoryboardConfigureWrapInferred() {
+        createNavigator().presentModal(storyboardName: "Orange", wrap: true) { vc in
             XCTAssertNotNil(vc)
             XCTAssertNotNil(vc.navigationController)
             XCTAssertEqual("OrangeViewController", String(describing: vc.classForCoder))
@@ -173,12 +183,14 @@ class NavigatorPresentModalTests: XCTestCase {
     }
 
     func testPresentModalWithUnassociatedStoryboardConfigure() {
-        let _: UIViewController = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Unassociated") { vc in
+        let _: UIViewController = createNavigator().presentModal(storyboardName: "Unassociated") { vc in
             XCTAssertNotNil(vc)
             XCTAssertNil(vc.navigationController)
             XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
         }
-        NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Unassociated") { vc in
+    }
+    func testPresentModalWithUnassociatedStoryboardConfigureInferred() {
+        createNavigator().presentModal(storyboardName: "Unassociated") { vc in
             XCTAssertNotNil(vc)
             XCTAssertNil(vc.navigationController)
             XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
@@ -186,12 +198,14 @@ class NavigatorPresentModalTests: XCTestCase {
     }
 
     func testPresentModalWithUnassociatedStoryboardConfigureWrap() {
-        let _: UIViewController = NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Unassociated", wrap: true) { vc in
+        let _: UIViewController = createNavigator().presentModal(storyboardName: "Unassociated", wrap: true) { vc in
             XCTAssertNotNil(vc)
             XCTAssertNotNil(vc.navigationController)
             XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))
         }
-        NavigatorPresentModalTests.navigator.presentModal(storyboardName: "Unassociated", wrap: true) { vc in
+    }
+    func testPresentModalWithUnassociatedStoryboardConfigureWrapInferred() {
+        createNavigator().presentModal(storyboardName: "Unassociated", wrap: true) { vc in
             XCTAssertNotNil(vc)
             XCTAssertNotNil(vc.navigationController)
             XCTAssertEqual("UIViewController", String(describing: vc.classForCoder))

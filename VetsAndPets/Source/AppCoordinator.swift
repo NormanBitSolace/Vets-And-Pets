@@ -72,6 +72,12 @@ extension AppCoordinator: PetOwnerInfoViewControllerDelegate {
     }
 }
 
+extension AppCoordinator: PetTableViewDataSourceDelegate {
+    func petSelected(_ model: PetModel, vetId: Int, completion: @escaping PetsCompletion) {
+        navigate(to: .petInfoPush("Update", model))
+    }
+}
+
 extension AppCoordinator: PetUserActionDelegate {
 
     func handle(_ action: UserAction<PetModel, PetsCompletion>, vetId: Int) {
@@ -85,19 +91,16 @@ extension AppCoordinator: PetUserActionDelegate {
             self.runShowLoading(task, message: action.message)
         }
     }
-
-    func petSelected(_ model: PetModel, vetId: Int, completion: @escaping PetsCompletion) {
-        navigate(to: .petInfoPush("Update", model))
-    }
 }
 
-extension AppCoordinator: VetUserActionDelegate {
-
+extension AppCoordinator: VetTableViewDataSourceDelegate {
     func vetSelected(_ model: VetModel) {
         guard let id = model.id else { preconditionFailure("Model assumed to have an id.")}
         navigate(to: .pets(id))
     }
+}
 
+extension AppCoordinator: VetUserActionDelegate {
     func handle(_ action: UserAction<VetModel, VetsCompletion>) {
         switch action {
         case .add(_):
@@ -205,7 +208,8 @@ fileprivate extension AppCoordinator {
 
         func showRootViewController() {
             navigator.showVetList { vc in
-                vc.delegate = self
+                let dataSource = VetTableViewDataSource(delegate: self)
+                vc.setup(delegate: self, dataDelegate: dataSource)
                 self.fetchVetsShowLoading(vc)
             }
         }
@@ -219,7 +223,10 @@ fileprivate extension AppCoordinator {
 
         func showPetList(_ vetId: Int) {
             navigator.showPetList { vc in
-                vc.setup(delegate: self, vetId: vetId)
+                let dataSource = PetTableViewDataSource(delegate: self, vetId: vetId, completion: vc.dataCompletion)
+                vc.setup(delegate: self, dataDelegate: dataSource, vetId: vetId)
+//                self.fetchPetsShowLoading(vc, vetId)
+                // TODO fix nav issue so above line can be used
                 self.dataService.pets(forVet: vetId) { models in
                     vc.dataCompletion(models)
                 }

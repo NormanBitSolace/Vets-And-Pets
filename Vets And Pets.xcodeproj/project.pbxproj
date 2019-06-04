@@ -17,6 +17,9 @@
 		9420BE8722554E41002801C1 /* PetOwnerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9420BE8622554E40002801C1 /* PetOwnerModel.swift */; };
 		9420BE8E22556EE0002801C1 /* PetOwnerInfo.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9420BE8A22556EDF002801C1 /* PetOwnerInfo.storyboard */; };
 		9420BE9022556EE0002801C1 /* PetOwnerInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9420BE8C22556EDF002801C1 /* PetOwnerInfoViewController.swift */; };
+		9444B4EF225ED08F007431B6 /* VetTableViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9444B4EE225ED08F007431B6 /* VetTableViewDataSource.swift */; };
+		9444B4F1225ED6A5007431B6 /* PetTableViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9444B4F0225ED6A5007431B6 /* PetTableViewDataSource.swift */; };
+		9444B4F3225ED779007431B6 /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9444B4F2225ED779007431B6 /* UserAction.swift */; };
 		94B520FB225D3BC3000BFE42 /* Vets_And_Pets_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B520FA225D3BC3000BFE42 /* Vets_And_Pets_Tests.swift */; };
 		94B52117225D3C06000BFE42 /* NavigatorChildTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B52102225D3C06000BFE42 /* NavigatorChildTests.swift */; };
 		94B52118225D3C06000BFE42 /* CompletionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B52104225D3C06000BFE42 /* CompletionViewController.swift */; };
@@ -30,7 +33,7 @@
 		94B52120225D3C06000BFE42 /* NavigatorRootTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B5210C225D3C06000BFE42 /* NavigatorRootTests.swift */; };
 		94B52121225D3C06000BFE42 /* NavigatorPresentModalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B5210D225D3C06000BFE42 /* NavigatorPresentModalTests.swift */; };
 		94B52122225D3C06000BFE42 /* ResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B5210F225D3C06000BFE42 /* ResultTests.swift */; };
-		94B52123225D3C06000BFE42 /* RestMethodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B52110225D3C06000BFE42 /* RestMethodTests.swift */; };
+		94B52123225D3C06000BFE42 /* RestHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B52110225D3C06000BFE42 /* RestHelperTests.swift */; };
 		94B52124225D3C06000BFE42 /* URLExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B52112225D3C06000BFE42 /* URLExtensionsTests.swift */; };
 		94B52125225D3C06000BFE42 /* EncodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B52113225D3C06000BFE42 /* EncodableTests.swift */; };
 		94B52126225D3C06000BFE42 /* DataExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B52114225D3C06000BFE42 /* DataExtensionTests.swift */; };
@@ -98,6 +101,9 @@
 		9420BE8622554E40002801C1 /* PetOwnerModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PetOwnerModel.swift; sourceTree = "<group>"; };
 		9420BE8A22556EDF002801C1 /* PetOwnerInfo.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = PetOwnerInfo.storyboard; sourceTree = "<group>"; };
 		9420BE8C22556EDF002801C1 /* PetOwnerInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PetOwnerInfoViewController.swift; sourceTree = "<group>"; };
+		9444B4EE225ED08F007431B6 /* VetTableViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetTableViewDataSource.swift; sourceTree = "<group>"; };
+		9444B4F0225ED6A5007431B6 /* PetTableViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetTableViewDataSource.swift; sourceTree = "<group>"; };
+		9444B4F2225ED779007431B6 /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
 		94B520F8225D3BC3000BFE42 /* Vets And Pets Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Vets And Pets Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		94B520FA225D3BC3000BFE42 /* Vets_And_Pets_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vets_And_Pets_Tests.swift; sourceTree = "<group>"; };
 		94B520FC225D3BC3000BFE42 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -113,7 +119,7 @@
 		94B5210C225D3C06000BFE42 /* NavigatorRootTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigatorRootTests.swift; sourceTree = "<group>"; };
 		94B5210D225D3C06000BFE42 /* NavigatorPresentModalTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigatorPresentModalTests.swift; sourceTree = "<group>"; };
 		94B5210F225D3C06000BFE42 /* ResultTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultTests.swift; sourceTree = "<group>"; };
-		94B52110225D3C06000BFE42 /* RestMethodTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RestMethodTests.swift; sourceTree = "<group>"; };
+		94B52110225D3C06000BFE42 /* RestHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RestHelperTests.swift; sourceTree = "<group>"; };
 		94B52112225D3C06000BFE42 /* URLExtensionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLExtensionsTests.swift; sourceTree = "<group>"; };
 		94B52113225D3C06000BFE42 /* EncodableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncodableTests.swift; sourceTree = "<group>"; };
 		94B52114225D3C06000BFE42 /* DataExtensionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataExtensionTests.swift; sourceTree = "<group>"; };
@@ -185,6 +191,7 @@
 			children = (
 				94E41D9722513C65006BD06B /* VetInfo.storyboard */,
 				94E41D9522513C58006BD06B /* VetInfoViewController.swift */,
+				9444B4EE225ED08F007431B6 /* VetTableViewDataSource.swift */,
 				94E41D87225136F9006BD06B /* Vets.storyboard */,
 				94E41D86225136F9006BD06B /* VetsViewController.swift */,
 			);
@@ -196,6 +203,7 @@
 			children = (
 				9403C3432253E006002D86C5 /* PetInfo.storyboard */,
 				9403C3412253E006002D86C5 /* PetInfoViewController.swift */,
+				9444B4F0225ED6A5007431B6 /* PetTableViewDataSource.swift */,
 				9403C3402253E006002D86C5 /* Pets.storyboard */,
 				9403C3422253E006002D86C5 /* PetsViewController.swift */,
 			);
@@ -230,13 +238,13 @@
 		94B52103225D3C06000BFE42 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				94B52109225D3C06000BFE42 /* Button.storyboard */,
+				94B52107225D3C06000BFE42 /* ButtonViewController.swift */,
+				94B5210A225D3C06000BFE42 /* CompletionPopoverViewController.swift */,
 				94B52104225D3C06000BFE42 /* CompletionViewController.swift */,
+				94B52108225D3C06000BFE42 /* Orange.storyboard */,
 				94B52105225D3C06000BFE42 /* OrangeViewController.swift */,
 				94B52106225D3C06000BFE42 /* Unassociated.storyboard */,
-				94B52107225D3C06000BFE42 /* ButtonViewController.swift */,
-				94B52108225D3C06000BFE42 /* Orange.storyboard */,
-				94B52109225D3C06000BFE42 /* Button.storyboard */,
-				94B5210A225D3C06000BFE42 /* CompletionPopoverViewController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -245,7 +253,7 @@
 			isa = PBXGroup;
 			children = (
 				94B5210F225D3C06000BFE42 /* ResultTests.swift */,
-				94B52110225D3C06000BFE42 /* RestMethodTests.swift */,
+				94B52110225D3C06000BFE42 /* RestHelperTests.swift */,
 				94B52111225D3C06000BFE42 /* Extensions */,
 				94B52115225D3C06000BFE42 /* RestPathTests.swift */,
 			);
@@ -384,6 +392,7 @@
 				9403C33C2253C935002D86C5 /* DataServiceTask.swift */,
 				94E41D90225137B3006BD06B /* Models */,
 				94E41D8E22513786006BD06B /* PetService.swift */,
+				9444B4F2225ED779007431B6 /* UserAction.swift */,
 				94E41D82225136F9006BD06B /* ViewControllers */,
 			);
 			path = Source;
@@ -536,7 +545,7 @@
 				94B52126225D3C06000BFE42 /* DataExtensionTests.swift in Sources */,
 				94B52118225D3C06000BFE42 /* CompletionViewController.swift in Sources */,
 				94B52122225D3C06000BFE42 /* ResultTests.swift in Sources */,
-				94B52123225D3C06000BFE42 /* RestMethodTests.swift in Sources */,
+				94B52123225D3C06000BFE42 /* RestHelperTests.swift in Sources */,
 				94B5211F225D3C06000BFE42 /* NavigatorPopoverTests.swift in Sources */,
 				94B52127225D3C06000BFE42 /* RestPathTests.swift in Sources */,
 			);
@@ -562,7 +571,10 @@
 				94E41D88225136F9006BD06B /* AppCoordinator.swift in Sources */,
 				9420BC4F22544113002801C1 /* Breeds.swift in Sources */,
 				94B52158225D3C39000BFE42 /* Data+Extensions.swift in Sources */,
+				9444B4F3225ED779007431B6 /* UserAction.swift in Sources */,
+				9444B4EF225ED08F007431B6 /* VetTableViewDataSource.swift in Sources */,
 				94B52156225D3C39000BFE42 /* Date+Extensions.swift in Sources */,
+				9444B4F1225ED6A5007431B6 /* PetTableViewDataSource.swift in Sources */,
 				94E41D89225136F9006BD06B /* DataService.swift in Sources */,
 				94B5214E225D3C39000BFE42 /* Int+Extensions.swift in Sources */,
 				9403C3462253E006002D86C5 /* PetsViewController.swift in Sources */,
