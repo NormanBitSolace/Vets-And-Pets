@@ -52,7 +52,7 @@ final class PetOwnerInfoViewController: UIViewController {
 
     func setup(action: String, model: PetOwnerModel? = nil) {
         title = "\(action) Pet Owner"
-        navigationController?.setLargeNavigation()
+        setLargeNavigation()
         actionButton.setTitle("\(action)", for: .normal)
         if let model = model {
             applyModel(model)

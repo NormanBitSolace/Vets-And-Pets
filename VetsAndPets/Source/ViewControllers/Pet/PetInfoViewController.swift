@@ -1,4 +1,5 @@
 import UIKit
+import BlackLabsDate
 
 typealias PetInfoCompletion = () -> Void
 
@@ -102,7 +103,7 @@ final class PetInfoViewController: UIViewController {
 
     func setup(action: String, model: PetModel? = nil) {
         title = "\(action) Pet"
-        navigationController?.setLargeNavigation()
+        setLargeNavigation()
         actionButton.setTitle("\(action)", for: .normal)
         if let model = model {
             applyModel(model)

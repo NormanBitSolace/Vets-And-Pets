@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "BlackLabsCGGeometery",
+        "repositoryURL": "https://github.com/NormanBitSolace/BlackLabsCGGeometery.git",
+        "state": {
+          "branch": null,
+          "revision": "8d718b6d2e02a801f838988a607aa10fb266e333",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "BlackLabsData",
+        "repositoryURL": "https://github.com/NormanBitSolace/BlackLabsData.git",
+        "state": {
+          "branch": null,
+          "revision": "84758a68330ee9bece6058c99e6baa2de296bbc6",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "BlackLabsDate",
+        "repositoryURL": "https://github.com/NormanBitSolace/BlackLabsDate.git",
+        "state": {
+          "branch": null,
+          "revision": "8af1a807d71cf4008374859063a7ab4d25a0148f",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "BlackLabsView",
+        "repositoryURL": "https://github.com/NormanBitSolace/BlackLabsView",
+        "state": {
+          "branch": null,
+          "revision": "587ad36110af90dbb4dbaf63b3829f69e4d6c5fa",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "BlackLabsViewController",
+        "repositoryURL": "https://github.com/NormanBitSolace/BlackLabsViewController.git",
+        "state": {
+          "branch": null,
+          "revision": "994632124453c9dabd3331984f30eea873fdc86d",
+          "version": "1.0.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

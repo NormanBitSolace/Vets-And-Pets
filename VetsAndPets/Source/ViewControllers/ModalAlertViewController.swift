@@ -1,5 +1,5 @@
 import UIKit
-
+import BlackLabsCGGeometery
 /*
  A square UIView with rounded corners so that it appears as a circle, and sizes it's contained UILabel as a square that fits within it's circle
  */

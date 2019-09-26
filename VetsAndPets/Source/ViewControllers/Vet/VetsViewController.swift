@@ -22,7 +22,7 @@ class VetsViewController: UIViewController {
     final override func viewDidLoad() {
         super.viewDidLoad()
         tableView.setAutoSizeHeight()
-        navigationController?.setLargeNavigation()
+        setLargeNavigation()
         rightButton(systemItem: .add, target: self, action: #selector(addVetButtonTap))
         title = "Vets"
     }

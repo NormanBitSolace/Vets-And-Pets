@@ -1,5 +1,7 @@
 import UIKit
 import MapKit
+import BlackLabsViewController
+import BlackLabsView
 
 enum AppViewControllers {
     case vets
@@ -271,7 +273,7 @@ fileprivate extension AppCoordinator {
 
         func showBreedSearch() {
             navigator.showBreedSearch { vc in
-                vc.navigationController?.setLargeNavigation()
+                vc.setLargeNavigation()
                 vc.title = "Breeds"
                 vc.data = Breeds.dogList
                 vc.delegate = self

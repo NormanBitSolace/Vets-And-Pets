@@ -1,4 +1,5 @@
 import UIKit
+import BlackLabsViewController
 
 public typealias Configure<T> = ((T) -> Swift.Void)?
 public typealias Completion<T> = ((T) -> Swift.Void)?
@@ -188,7 +189,7 @@ extension Navigator {
         animated: Bool = true,
         completion: Completion<T> = nil,
         configure: Configure<T> = nil) -> UIViewController? {
-        if let parentVC = UIViewController.topMostController() {
+        if let parentVC = UIViewController.topMostController {
             var vc: UIViewController
             if let storyboardName = storyboardName {
                 vc = UIViewController.loadStoryboard(storyboardName) as T

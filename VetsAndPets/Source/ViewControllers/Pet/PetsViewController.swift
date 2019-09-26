@@ -42,7 +42,7 @@ class PetsViewController: UIViewController {
         dataDelegate.tableView = tableView
         dataDelegate.swipeActions = [deleteAction/*, editAction*/]
         tableView.setAutoSizeHeight()
-        navigationController?.setLargeNavigation()
+        setLargeNavigation()
         rightButton(systemItem: .add, target: self, action: #selector(addPetButtonTap))
         title = "Pets"
     }

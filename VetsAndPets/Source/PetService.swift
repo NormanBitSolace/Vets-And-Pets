@@ -1,4 +1,5 @@
 import Foundation
+import BlackLabsData
 
 class PetService: DataService, RestHelper {
 

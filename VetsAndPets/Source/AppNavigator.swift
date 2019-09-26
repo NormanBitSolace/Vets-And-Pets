@@ -1,5 +1,6 @@
 import UIKit
 import os
+import BlackLabsViewController
 
 struct LOG {
     static func info(_ string: String) {

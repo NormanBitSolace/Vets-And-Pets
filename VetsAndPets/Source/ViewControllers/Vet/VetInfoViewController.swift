@@ -77,7 +77,7 @@ final class VetInfoViewController: UIViewController {
     func setup(action: String, model: VetModel? = nil) {
         title = "\(action) Vet"
         id = model?.id
-        navigationController?.setLargeNavigation()
+        setLargeNavigation()
         rightButton(systemItem: .cancel, target: self, action: #selector(self.dismissViewController))
         actionButton.setTitle("\(action)", for: .normal)
         if let model = model {
